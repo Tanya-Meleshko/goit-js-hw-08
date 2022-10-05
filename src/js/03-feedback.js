@@ -20,7 +20,7 @@ refs.form.addEventListener('submit', onFormSubmit);
 refs.form.addEventListener('input', Throttle(onWritesDataToLocalstorage, 500));
 
 //Вызываем фунцию, которая добавляет текст в поля ввода, если он был набран ранее
-populateInput();
+populateInputFields();
 
 //Функция записывает данные в localstorage
 function onWritesDataToLocalstorage(event) {
@@ -30,34 +30,35 @@ function onWritesDataToLocalstorage(event) {
 
 //Функция отменяет перезагрузку страницы при отправке данных,
 //восстанавливает стандартные значения,
+//выводит в консоль объект с данными,если заполнены все поля
 //удаляет из localstorage запись с ключом,
-//выводит в консоль объект с данными
+//если заполнены не все поля - выводит сообщение и добавляет набранный текст в поле из localstorage
 function onFormSubmit(event) {
   event.preventDefault();
   event.currentTarget.reset();
-  console.log(fotmData);
-  localStorage.removeItem(STORAGE_KEY);
-  fotmData = checkStorage();
-}
-
-//Функция добавляет текст в texterea, если он был набран ранее
-function populateInput() {
   const saveMessage = localStorage.getItem(STORAGE_KEY);
-  if (saveMessage) {
-    const fotmDataSaved = JSON.parse(saveMessage);
-    if (fotmDataSaved.email !== null) {
-      refs.input.value = fotmDataSaved.email;
-    } else {
-      refs.input.value = '';
-    }
-    if (fotmDataSaved.message !== null) {
-      refs.textarea.value = fotmDataSaved.message;
-    } else {
-      refs.textarea.value = '';
-    }
+  if (JSON.parse(saveMessage).email && JSON.parse(saveMessage).message) {
+    console.log(fotmData);
+    localStorage.removeItem(STORAGE_KEY);
+    fotmData = checkStorage();
+  } else {
+    alert('Please fill in all fields');
+    populateInputFields();
   }
 }
 
+//Функция добавляет текст в поле ввода, если он был набран ранее
+function populateInputFields() {
+  const saveMessage = localStorage.getItem(STORAGE_KEY);
+  if (saveMessage) {
+    const fotmDataSaved = JSON.parse(saveMessage);
+    refs.input.value = fotmDataSaved.email || '';
+    refs.textarea.value = fotmDataSaved.message || '';
+  }
+}
+
+//Функция заполняет обЪект данными, если они есть в localstorage
+//или создает пустой обЪект
 function checkStorage() {
   const saveMessage = localStorage.getItem(STORAGE_KEY);
   if (saveMessage) {
